@@ -16,29 +16,33 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 	className
 }) => {
 	const [touchStart, setTouchStart] = React.useState<number | null>(null);
+	const [lastSwipeY, setLastSwipeY] = React.useState<number | null>(null);
 	const isCleared = swipeCount >= 3;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		e.stopPropagation();
 		setTouchStart(e.touches[0].clientY);
+		setLastSwipeY(e.touches[0].clientY);
 	};
 
 	const handleTouchMove = (e: React.TouchEvent) => {
 		e.stopPropagation();
-		if (touchStart === null || isCleared) return;
+		if (touchStart === null || lastSwipeY === null || isCleared) return;
 
-		const touchEnd = e.touches[0].clientY;
-		const distance = Math.abs(touchEnd - touchStart);
+		const currentY = e.touches[0].clientY;
+		const distance = Math.abs(currentY - lastSwipeY);
 
-		// Require 50px swipe distance
+		// Require 50px swipe distance from last swipe position
 		if (distance > 50) {
 			onSwipe(answerId, swipeCount + 1);
-			setTouchStart(null);
+			// Update last swipe position to allow continuous swiping
+			setLastSwipeY(currentY);
 		}
 	};
 
 	const handleTouchEnd = () => {
 		setTouchStart(null);
+		setLastSwipeY(null);
 	};
 
 	if (isCleared) {

@@ -223,36 +223,35 @@ export const gameActions = {
 	 * Called by global controller after distributing traps
 	 */
 	async startQuestion() {
-		await kmClient.transact([globalStore], async ([globalState]) => {
-			// Get winning category
-			const votes = globalState.categoryVoting?.votes || {};
-			const voteCounts: Record<string, number> = {};
+		// Get category info BEFORE transaction
+		const votes = globalStore.proxy.categoryVoting?.votes || {};
+		const voteCounts: Record<string, number> = {};
 
-			Object.values(votes).forEach((categoryId) => {
-				voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
-			});
+		Object.values(votes).forEach((categoryId) => {
+			voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
+		});
 
-			let winningCategoryId = '';
-			let maxVotes = 0;
-			Object.entries(voteCounts).forEach(([categoryId, count]) => {
-				if (count > maxVotes) {
-					maxVotes = count;
-					winningCategoryId = categoryId;
-				}
-			});
+		let winningCategoryId = '';
+		let maxVotes = 0;
+		Object.entries(voteCounts).forEach(([categoryId, count]) => {
+			if (count > maxVotes) {
+				maxVotes = count;
+				winningCategoryId = categoryId;
+			}
+		});
 
-			// Get category name
-			const category = globalState.categoryVoting?.categories.find(
-				(c) => c.id === winningCategoryId
-			);
-			const categoryName = category?.name || 'General Knowledge';
+		// Get category name
+		const category = globalStore.proxy.categoryVoting?.categories.find(
+			(c) => c.id === winningCategoryId
+		);
+		const categoryName = category?.name || 'General Knowledge';
 
-			// Generate question using AI, avoiding previously asked questions
-			const question = await generateQuestion(
-				categoryName,
-				globalState.askedQuestions
-			);
+		// Generate question BEFORE transaction, avoiding previously asked questions
+		const askedQuestions = globalStore.proxy.askedQuestions || [];
+		const question = await generateQuestion(categoryName, askedQuestions);
 
+		// NOW do the transaction with the generated question
+		await kmClient.transact([globalStore], ([globalState]) => {
 			// Store this question to prevent duplicates
 			globalState.askedQuestions.push(question.text);
 
