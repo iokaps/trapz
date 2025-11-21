@@ -10,7 +10,7 @@ interface Props {
 export const DevFrame: FC<Props> = ({ clientKey, context }) => {
 	const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
-	const [link, setLink] = useState('');
+	const [link, setLink] = useState(() => generateLink(clientKey, context));
 
 	const onMessage = useCallback(
 		(event: MessageEvent) => {

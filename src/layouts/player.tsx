@@ -10,7 +10,7 @@ interface LayoutProps {
 const PlayerRoot: React.FC<LayoutProps> = ({ children, className }) => (
 	<main
 		className={cn(
-			'bg-slate-100 grid min-h-dvh grid-rows-[auto_1fr_auto]',
+			'grid min-h-dvh grid-rows-[auto_1fr_auto] bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50',
 			className
 		)}
 	>
@@ -21,12 +21,14 @@ const PlayerRoot: React.FC<LayoutProps> = ({ children, className }) => (
 const PlayerHeader: React.FC<LayoutProps> = ({ children, className }) => (
 	<header
 		className={cn(
-			'bg-white sticky top-0 z-10 shadow-sm py-4',
+			'sticky top-0 z-10 border-b-2 border-white/30 bg-white/90 py-4 shadow-lg backdrop-blur-md',
 			className
 		)}
 	>
 		<div className="container mx-auto flex flex-wrap items-center justify-between px-4">
-			<div className="font-bold">{config.title}</div>
+			<div className="bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-2xl font-extrabold text-transparent">
+				{config.title}
+			</div>
 
 			{children}
 		</div>
@@ -47,7 +49,7 @@ const PlayerMain: React.FC<LayoutProps> = ({ children, className }) => (
 const PlayerFooter: React.FC<LayoutProps> = ({ children, className }) => (
 	<footer
 		className={cn(
-			'bg-white text-gray-900 sticky bottom-0 z-10 p-4',
+			'sticky bottom-0 z-10 border-t-2 border-white/30 bg-white/90 p-4 text-gray-900 shadow-lg backdrop-blur-md',
 			className
 		)}
 	>

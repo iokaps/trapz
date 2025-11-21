@@ -1,0 +1,76 @@
+import { cn } from '@/utils/cn';
+import { Droplets } from 'lucide-react';
+import * as React from 'react';
+
+interface MudTrapProps {
+	answerId: string;
+	swipeCount: number;
+	onSwipe: (answerId: string, newCount: number) => void;
+	className?: string;
+}
+
+export const MudTrap: React.FC<MudTrapProps> = ({
+	answerId,
+	swipeCount,
+	onSwipe,
+	className
+}) => {
+	const [touchStart, setTouchStart] = React.useState<number | null>(null);
+	const isCleared = swipeCount >= 3;
+
+	const handleTouchStart = (e: React.TouchEvent) => {
+		e.stopPropagation();
+		setTouchStart(e.touches[0].clientY);
+	};
+
+	const handleTouchMove = (e: React.TouchEvent) => {
+		e.stopPropagation();
+		if (touchStart === null || isCleared) return;
+
+		const touchEnd = e.touches[0].clientY;
+		const distance = Math.abs(touchEnd - touchStart);
+
+		// Require 50px swipe distance
+		if (distance > 50) {
+			onSwipe(answerId, swipeCount + 1);
+			setTouchStart(null);
+		}
+	};
+
+	const handleTouchEnd = () => {
+		setTouchStart(null);
+	};
+
+	if (isCleared) {
+		return null;
+	}
+
+	// Calculate opacity based on swipe progress
+	const opacity = 0.95 - swipeCount * 0.25;
+
+	return (
+		<div
+			className={cn(
+				'absolute inset-0 z-20 flex touch-none items-center justify-center rounded-2xl border-4 border-amber-900/40 shadow-2xl',
+				'cursor-move select-none',
+				className
+			)}
+			style={{
+				background: `linear-gradient(135deg, rgba(120, 53, 15, ${opacity}) 0%, rgba(180, 83, 9, ${opacity}) 100%)`,
+				backdropFilter: 'blur(6px)'
+			}}
+			onTouchStart={handleTouchStart}
+			onTouchMove={handleTouchMove}
+			onTouchEnd={handleTouchEnd}
+		>
+			<div className="pointer-events-none flex flex-col items-center gap-3">
+				<div className="rounded-full bg-amber-900/30 p-4 shadow-lg backdrop-blur-sm">
+					<Droplets className="h-20 w-20 text-amber-200 drop-shadow-xl" />
+				</div>
+				<div className="px-4 text-center text-2xl font-extrabold text-amber-100 drop-shadow-lg">
+					Swipe {3 - swipeCount} more {swipeCount === 2 ? 'time' : 'times'}!
+				</div>
+			</div>
+		</div>
+	);
+};

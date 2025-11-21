@@ -32,11 +32,13 @@ theme:
   depth: '1'
 
 # Translations
-title: 'Host Starter'
+title: 'Trapz'
 
 gameLobbyMd: |
-  # Waiting for game to start...
-  The game will start once the host presses the start button.
+  # Welcome to Trapz!
+  Get ready for fast-paced trivia with tricky traps!
+
+  The host will start the game when everyone is ready.
 
 connectionsMd: |
   # Connections example
@@ -46,6 +48,7 @@ sharedStateMd: |
 
 players: 'Players'
 timeElapsed: 'Time elapsed'
+timeRemaining: 'Time remaining'
 startButton: 'Start Game'
 stopButton: 'Stop Game'
 
@@ -68,3 +71,42 @@ playerLinkLabel: 'Player Link'
 presenterLinkLabel: 'Presenter Link'
 
 menuAriaLabel: 'Open menu drawer'
+
+# Game setup
+numberOfRoundsLabel: 'Number of Rounds:'
+roundsLabel: 'rounds'
+
+# Category voting
+categoryVotingTitle: 'Choose a Category'
+categoryVotingDescription: 'Vote for the trivia category you want to play!'
+waitingForOtherPlayers: 'Waiting for other players...'
+
+# Trap selection
+trapSelectionTitle: 'Select a Trap'
+trapSelectionDescription: 'Choose a trap and target an opponent!'
+selectTargetPlayer: 'Select target player:'
+backButton: 'Back'
+trapSelected: 'Trap selected!'
+yourSelection: 'Your selection:'
+
+# Question
+trapsActive: 'Traps active'
+answerSubmitted: 'Answer submitted!'
+
+# Results
+correct: 'Correct!'
+incorrect: 'Incorrect'
+pointsEarned: 'Points earned'
+yourTime: 'Your time'
+yourAnswer: 'Your answer'
+correctAnswerWas: 'Correct answer was'
+nextRoundStartingSoon: 'Next round starting soon...'
+didNotAnswer: 'You did not answer this question'
+
+# Final scores
+finalScoresTitle: 'Game Over!'
+yourFinalScore: 'Your final score'
+rank: 'Rank'
+topPlayers: 'Top Players'
+fullLeaderboard: 'Full Leaderboard'
+playAgainButton: 'Play Again'
