@@ -33,17 +33,17 @@ export const CategoryVotingView: React.FC = () => {
 	});
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-6">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-3">
 			<div className="text-center text-slate-800">
-				<h1 className="text-4xl font-extrabold drop-shadow-sm">
+				<h1 className="text-3xl font-extrabold drop-shadow-sm">
 					{config.categoryVotingTitle}
 				</h1>
-				<p className="mt-2 text-lg drop-shadow-sm">
+				<p className="mt-1 text-base drop-shadow-sm">
 					{config.categoryVotingDescription}
 				</p>
 			</div>
 
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-blue-50 p-6 text-center shadow-2xl backdrop-blur-sm">
+			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-blue-50 p-4 text-center shadow-2xl backdrop-blur-sm">
 				<div className="text-sm font-bold tracking-wide text-gray-700 uppercase">
 					{config.timeRemaining}
 				</div>
@@ -63,7 +63,7 @@ export const CategoryVotingView: React.FC = () => {
 							onClick={() => handleVote(category.id)}
 							disabled={hasVoted}
 							className={cn(
-								'relative rounded-2xl border-2 p-6 text-left transition-all duration-300',
+								'relative rounded-2xl border-2 p-4 text-left transition-all duration-300',
 								'touch-manipulation shadow-lg hover:shadow-2xl active:scale-95',
 								isMyVote
 									? 'animate-pulse-glow border-green-400 bg-gradient-to-br from-green-50 to-emerald-100'

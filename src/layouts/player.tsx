@@ -21,12 +21,12 @@ const PlayerRoot: React.FC<LayoutProps> = ({ children, className }) => (
 const PlayerHeader: React.FC<LayoutProps> = ({ children, className }) => (
 	<header
 		className={cn(
-			'sticky top-0 z-10 border-b-2 border-white/30 bg-white/90 py-4 shadow-lg backdrop-blur-md',
+			'sticky top-0 z-10 border-b-2 border-white/30 bg-white/90 py-2 shadow-lg backdrop-blur-md',
 			className
 		)}
 	>
-		<div className="container mx-auto flex flex-wrap items-center justify-between px-4">
-			<div className="bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-2xl font-extrabold text-transparent">
+		<div className="container mx-auto flex flex-wrap items-center justify-between px-3">
+			<div className="bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-xl font-extrabold text-transparent">
 				{config.title}
 			</div>
 
@@ -38,7 +38,7 @@ const PlayerHeader: React.FC<LayoutProps> = ({ children, className }) => (
 const PlayerMain: React.FC<LayoutProps> = ({ children, className }) => (
 	<main
 		className={cn(
-			'container mx-auto flex items-center justify-center p-4 lg:p-6',
+			'container mx-auto flex items-center justify-center p-3 lg:p-4',
 			className
 		)}
 	>
@@ -49,7 +49,7 @@ const PlayerMain: React.FC<LayoutProps> = ({ children, className }) => (
 const PlayerFooter: React.FC<LayoutProps> = ({ children, className }) => (
 	<footer
 		className={cn(
-			'sticky bottom-0 z-10 border-t-2 border-white/30 bg-white/90 p-4 text-gray-900 shadow-lg backdrop-blur-md',
+			'sticky bottom-0 z-10 border-t-2 border-white/30 bg-white/90 p-3 text-gray-900 shadow-lg backdrop-blur-md',
 			className
 		)}
 	>

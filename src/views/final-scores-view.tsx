@@ -37,9 +37,9 @@ export const FinalScoresView: React.FC = () => {
 	};
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-6">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-3">
 			<div className="text-center text-slate-800">
-				<div className="inline-block rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 p-6 shadow-2xl">
+				<div className="inline-block rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 p-4 shadow-2xl">
 					<Trophy className="h-20 w-20 text-yellow-900 drop-shadow-lg" />
 				</div>
 				<h1 className="mt-6 text-5xl font-extrabold drop-shadow-sm">

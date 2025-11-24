@@ -62,17 +62,17 @@ export const TrapSelectionView: React.FC = () => {
 	);
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-4xl flex-col gap-6">
+		<div className="animate-slide-up flex w-full max-w-4xl flex-col gap-3">
 			<div className="text-center text-slate-800">
-				<h1 className="text-4xl font-extrabold drop-shadow-sm">
+				<h1 className="text-3xl font-extrabold drop-shadow-sm">
 					{config.trapSelectionTitle}
 				</h1>
-				<p className="mt-2 text-lg drop-shadow-sm">
+				<p className="mt-1 text-base drop-shadow-sm">
 					{config.trapSelectionDescription}
 				</p>
 			</div>
 
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-orange-50 p-6 text-center shadow-2xl backdrop-blur-sm">
+			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-orange-50 p-4 text-center shadow-2xl backdrop-blur-sm">
 				<div className="text-sm font-bold tracking-wide text-gray-700 uppercase">
 					{config.timeRemaining}
 				</div>
@@ -96,7 +96,7 @@ export const TrapSelectionView: React.FC = () => {
 								key={trapType}
 								onClick={() => handleTrapSelect(trapType)}
 								className={cn(
-									'flex flex-col items-center gap-3 rounded-2xl border-2 p-8',
+									'flex flex-col items-center gap-2 rounded-2xl border-2 p-5',
 									'border-white/50 bg-gradient-to-br shadow-xl transition-all duration-300',
 									'touch-manipulation hover:scale-105 hover:shadow-2xl active:scale-95',
 									'backdrop-blur-sm',

@@ -54,8 +54,8 @@ export const QuestionView: React.FC = () => {
 	};
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-6">
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-purple-50 p-6 shadow-2xl backdrop-blur-sm">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-3">
+			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-purple-50 p-4 shadow-2xl backdrop-blur-sm">
 				<div className="mb-3 inline-block rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase shadow-md">
 					{currentQuestion.categoryName}
 				</div>
@@ -64,11 +64,11 @@ export const QuestionView: React.FC = () => {
 				</h2>
 			</div>
 
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-pink-50 p-6 text-center shadow-2xl backdrop-blur-sm">
-				<div className="text-sm font-bold tracking-wide text-gray-700 uppercase">
+			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-pink-50 p-3 text-center shadow-2xl backdrop-blur-sm">
+				<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
 					{config.timeRemaining}
 				</div>
-				<div className="text-4xl font-extrabold text-pink-600">
+				<div className="text-3xl font-extrabold text-pink-600">
 					<KmTimeCountdown ms={timeRemaining} />
 				</div>
 			</div>

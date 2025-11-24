@@ -56,16 +56,16 @@ export const QuestionResultView: React.FC = () => {
 						</div>
 					)}
 				</div>
-				<h2 className="mt-6 text-4xl font-extrabold text-white drop-shadow-sm">
+				<h2 className="mt-4 text-3xl font-extrabold text-white drop-shadow-sm">
 					{myResult.isCorrect ? config.correct : config.incorrect}
 				</h2>
-			</div>{' '}
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-blue-50 p-8 shadow-2xl backdrop-blur-sm">
+			</div>
+			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-blue-50 p-4 shadow-2xl backdrop-blur-sm">
 				<div className="text-center">
-					<div className="text-sm font-bold tracking-wide text-gray-700 uppercase">
+					<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
 						{config.pointsEarned}
 					</div>
-					<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-6xl font-extrabold text-transparent">
+					<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-5xl font-extrabold text-transparent">
 						{myResult.pointsEarned}
 					</div>
 				</div>
