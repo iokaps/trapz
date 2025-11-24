@@ -117,8 +117,22 @@ export function useGlobalController() {
 					console.error('Failed to start question:', error);
 				});
 			}
-		} // Question phase
+		}
+
+		// Question phase
 		if (gamePhase === 'question' && currentQuestion) {
+			// Pre-generate next question in the background if not already generated and not last round
+			const currentRound = globalStore.proxy.currentRound;
+			const totalRounds = globalStore.proxy.totalRounds;
+			if (
+				!globalStore.proxy.pregeneratedQuestion &&
+				currentRound < totalRounds
+			) {
+				gameActions.pregenerateQuestion().catch(() => {
+					// Silently fail, will generate on-demand if needed
+				});
+			}
+
 			// Count only online players
 			const onlinePlayerCount = clientIds.size;
 			// Count answers from online players only
@@ -152,6 +166,18 @@ export function useGlobalController() {
 
 		// Question result phase - auto-advance after 5 seconds
 		if (gamePhase === 'question-result') {
+			// Pre-generate next question in the background if not already generated and not last round
+			const currentRound = globalStore.proxy.currentRound;
+			const totalRounds = globalStore.proxy.totalRounds;
+			if (
+				!globalStore.proxy.pregeneratedQuestion &&
+				currentRound < totalRounds
+			) {
+				gameActions.pregenerateQuestion().catch(() => {
+					// Silently fail, will generate on-demand if needed
+				});
+			}
+
 			const lastResult = globalStore.proxy.lastQuestionResult;
 			if (lastResult && lastResult.shownTimestamp) {
 				const timeExpired = serverTime >= lastResult.shownTimestamp + 5000;

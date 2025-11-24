@@ -1,4 +1,5 @@
 export type TrapType = 'ice' | 'mud' | 'mixed-letters' | 'missing-letters';
+export type SelectionType = TrapType | 'double-points';
 
 export type GamePhase =
 	| 'lobby'
@@ -36,7 +37,7 @@ export interface CategoryVoting {
 export interface TrapSelection {
 	endTimestamp: number;
 	selections: Record<string, boolean>; // clientId -> hasSelected
-	traps: Record<string, Array<{ type: TrapType; targetClientId: string }>>; // clientId -> traps they're sending
+	traps: Record<string, Array<{ type: SelectionType; targetClientId: string }>>; // clientId -> traps they're sending
 }
 
 export interface CurrentQuestion {

@@ -31,15 +31,15 @@ export const CreateProfileView: React.FC<Props> = ({ className }) => {
 	return (
 		<div
 			className={cn(
-				'animate-slide-up w-full max-w-96 rounded-3xl border-2 border-white/50 bg-white/90 shadow-2xl backdrop-blur-sm',
+				'animate-slide-up w-full max-w-96 rounded-xl border-2 border-white/50 bg-white/90 shadow-lg backdrop-blur-sm',
 				className
 			)}
 		>
-			<div className="p-8">
-				<h2 className="mb-4 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-3xl font-extrabold text-transparent">
+			<div className="p-5">
+				<h2 className="mb-3 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-2xl font-extrabold text-transparent">
 					{config.playerNameTitle}
 				</h2>
-				<form onSubmit={handleSubmit} className="space-y-6">
+				<form onSubmit={handleSubmit} className="space-y-4">
 					<label className="block">
 						<input
 							type="text"
@@ -49,12 +49,12 @@ export const CreateProfileView: React.FC<Props> = ({ className }) => {
 							disabled={isLoading}
 							autoFocus
 							maxLength={50}
-							className="w-full rounded-xl border-2 border-gray-300 px-5 py-3 text-lg font-medium shadow-sm transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-400 focus:outline-none"
+							className="w-full rounded-lg border-2 border-gray-300 px-4 py-2.5 text-base font-medium shadow-sm transition-all focus:border-blue-400 focus:ring-4 focus:ring-blue-400 focus:outline-none"
 						/>
 					</label>
 					<button
 						type="submit"
-						className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 text-lg font-bold text-white shadow-xl transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-indigo-700 hover:shadow-2xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+						className="w-full rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-5 py-3 text-base font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-indigo-700 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 						disabled={!name.trim() || isLoading}
 					>
 						{isLoading ? (

@@ -1,5 +1,6 @@
 import { kmClient } from '@/services/km-client';
-import type { Category, Question, TrapType } from '@/types/game';
+import type { Category, Question, SelectionType, TrapType } from '@/types/game';
+import { soundEffects } from '@/utils/sound-effects';
 import { globalStore } from '../stores/global-store';
 import { playerStore } from '../stores/player-store';
 
@@ -152,6 +153,8 @@ export const gameActions = {
 				endTimestamp: kmClient.serverTimestamp() + 30000 // 30 seconds
 			};
 		});
+
+		soundEffects.play('game-start');
 	},
 
 	/**
@@ -163,6 +166,8 @@ export const gameActions = {
 				globalState.categoryVoting.votes[kmClient.id] = categoryId;
 			}
 		});
+
+		soundEffects.play('vote-cast');
 	},
 
 	/**
@@ -181,21 +186,34 @@ export const gameActions = {
 	},
 
 	/**
-	 * Select a trap to throw at another player
+	 * Select a trap to throw at another player or double-points for self
 	 */
-	async selectTrap(trapType: TrapType, targetClientId: string) {
+	async selectTrap(selectionType: SelectionType, targetClientId: string) {
 		await kmClient.transact(
 			[globalStore, playerStore],
 			([globalState, playerState]) => {
 				if (globalState.trapSelection) {
+					// Validate double-points can only be selected on 5th questions
+					if (selectionType === 'double-points') {
+						const isDoublePointsRound =
+							(globalState.totalQuestionsAsked + 1) % 5 === 0;
+						if (!isDoublePointsRound) {
+							console.error('Double points not available this round');
+							return;
+						}
+						// Set double points for this player
+						playerState.hasDoublePoints = true;
+						globalState.activeDoublePoints[kmClient.id] = true;
+					}
+
 					// Initialize array if not exists
 					if (!globalState.trapSelection.traps[kmClient.id]) {
 						globalState.trapSelection.traps[kmClient.id] = [];
 					}
 
-					// Add the trap
+					// Add the selection
 					globalState.trapSelection.traps[kmClient.id].push({
-						type: trapType,
+						type: selectionType,
 						targetClientId
 					});
 
@@ -203,10 +221,17 @@ export const gameActions = {
 					globalState.trapSelection.selections[kmClient.id] = true;
 
 					// Store in player state
-					playerState.selectedTrap = { type: trapType, targetClientId };
+					playerState.selectedTrap = { type: selectionType, targetClientId };
 				}
 			}
 		);
+
+		// Play appropriate sound
+		if (selectionType === 'double-points') {
+			soundEffects.play('powerup-activated');
+		} else {
+			soundEffects.play('trap-activated');
+		}
 	},
 
 	/**
@@ -342,16 +367,22 @@ export const gameActions = {
 				// Store this question to prevent duplicates
 				globalState.askedQuestions.push(question.text);
 
-				// Distribute traps to players
+				// Increment question counter
+				globalState.totalQuestionsAsked += 1;
+
+				// Distribute traps to players (filter out double-points)
 				const trapsApplied: Record<string, TrapType[]> = {};
 				const trapSelections = globalState.trapSelection?.traps || {};
 
 				Object.values(trapSelections).forEach((traps) => {
 					traps.forEach((trap) => {
-						if (!trapsApplied[trap.targetClientId]) {
-							trapsApplied[trap.targetClientId] = [];
+						// Only apply actual traps, not double-points
+						if (trap.type !== 'double-points') {
+							if (!trapsApplied[trap.targetClientId]) {
+								trapsApplied[trap.targetClientId] = [];
+							}
+							trapsApplied[trap.targetClientId].push(trap.type as TrapType);
 						}
-						trapsApplied[trap.targetClientId].push(trap.type);
 					});
 				});
 
@@ -443,6 +474,11 @@ export const gameActions = {
 					pointsEarned = Math.round(
 						Math.max(minPoints, maxPoints - timeToAnswer * penalty)
 					);
+
+					// Apply double points multiplier if active
+					if (globalState.activeDoublePoints[clientId]) {
+						pointsEarned *= 2;
+					}
 				}
 
 				results[clientId] = {
@@ -455,6 +491,15 @@ export const gameActions = {
 				// Update total score
 				globalState.scores[clientId] =
 					(globalState.scores[clientId] || 0) + pointsEarned;
+
+				// Play sound effect
+				if (clientId === kmClient.id) {
+					if (isCorrect) {
+						soundEffects.play('correct-answer');
+					} else {
+						soundEffects.play('incorrect-answer');
+					}
+				}
 			});
 
 			globalState.lastQuestionResult = {
@@ -477,8 +522,12 @@ export const gameActions = {
 			([globalState, playerState]) => {
 				// Reset player answered state
 				playerState.hasAnswered = false;
+				playerState.hasDoublePoints = false;
 				playerState.iceTapProgress = {};
 				playerState.mudSwipeProgress = {};
+
+				// Clear active double points for all players
+				globalState.activeDoublePoints = {};
 
 				if (globalState.currentRound >= globalState.totalRounds) {
 					// Game over
@@ -513,6 +562,8 @@ export const gameActions = {
 			globalState.lastQuestionResult = null;
 			globalState.askedQuestions = [];
 			globalState.pregeneratedQuestion = null;
+			globalState.totalQuestionsAsked = 0;
+			globalState.activeDoublePoints = {};
 		});
 	},
 

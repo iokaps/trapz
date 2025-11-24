@@ -17,11 +17,11 @@ export const GameLobbyView: React.FC<React.PropsWithChildren<Props>> = ({
 	return (
 		<div
 			className={cn(
-				'animate-slide-up w-full max-w-screen-sm rounded-3xl border-2 border-white/50 bg-white/90 shadow-2xl backdrop-blur-sm',
+				'animate-slide-up w-full max-w-screen-sm rounded-xl border-2 border-white/50 bg-white/90 shadow-lg backdrop-blur-sm',
 				className
 			)}
 		>
-			<div className="prose prose-lg prose-headings:bg-gradient-to-r prose-headings:from-purple-600 prose-headings:to-indigo-600 prose-headings:bg-clip-text prose-headings:text-transparent p-8">
+			<div className="prose prose-sm prose-headings:bg-gradient-to-r prose-headings:from-purple-600 prose-headings:to-indigo-600 prose-headings:bg-clip-text prose-headings:text-transparent p-4">
 				<Markdown>{config.gameLobbyMd}</Markdown>
 			</div>
 		</div>

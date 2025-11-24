@@ -1,5 +1,6 @@
 import { cn } from '@/utils/cn';
 import { Droplets } from 'lucide-react';
+import { motion } from 'motion/react';
 import * as React from 'react';
 
 interface MudTrapProps {
@@ -17,12 +18,14 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 }) => {
 	const [touchStart, setTouchStart] = React.useState<number | null>(null);
 	const [lastSwipeY, setLastSwipeY] = React.useState<number | null>(null);
+	const [isSwiping, setIsSwiping] = React.useState(false);
 	const isCleared = swipeCount >= 8;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		e.stopPropagation();
 		setTouchStart(e.touches[0].clientY);
 		setLastSwipeY(e.touches[0].clientY);
+		setIsSwiping(true);
 	};
 
 	const handleTouchMove = (e: React.TouchEvent) => {
@@ -43,17 +46,19 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 	const handleTouchEnd = () => {
 		setTouchStart(null);
 		setLastSwipeY(null);
+		setIsSwiping(false);
 	};
 
 	if (isCleared) {
 		return null;
 	}
 
-	// Calculate opacity based on swipe progress (fade gradually over 8 swipes)
+	// Calculate opacity and blur based on swipe progress (fade gradually over 8 swipes)
 	const opacity = 0.95 - swipeCount * 0.1;
+	const blurAmount = Math.max(0, 6 - swipeCount * 0.7);
 
 	return (
-		<div
+		<motion.div
 			className={cn(
 				'absolute inset-0 z-20 flex touch-none items-center justify-center rounded-2xl border-4 border-amber-900/40 shadow-2xl',
 				'cursor-move select-none',
@@ -61,11 +66,21 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 			)}
 			style={{
 				background: `linear-gradient(135deg, rgba(120, 53, 15, ${opacity}) 0%, rgba(180, 83, 9, ${opacity}) 100%)`,
-				backdropFilter: 'blur(6px)'
+				backdropFilter: `blur(${blurAmount}px)`
 			}}
 			onTouchStart={handleTouchStart}
 			onTouchMove={handleTouchMove}
 			onTouchEnd={handleTouchEnd}
+			initial={{ scale: 0.8, opacity: 0 }}
+			whileInView={{ scale: 1, opacity: 1 }}
+			animate={
+				isSwiping
+					? {
+							y: [0, -3, 3, 0]
+						}
+					: {}
+			}
+			transition={{ duration: 0.2 }}
 		>
 			<div className="pointer-events-none flex flex-col items-center gap-3">
 				<div className="rounded-full bg-amber-900/30 p-4 shadow-lg backdrop-blur-sm">
@@ -75,6 +90,6 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 					Swipe {8 - swipeCount} more {swipeCount === 7 ? 'time' : 'times'}!
 				</div>
 			</div>
-		</div>
+		</motion.div>
 	);
 };

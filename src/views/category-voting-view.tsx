@@ -33,26 +33,26 @@ export const CategoryVotingView: React.FC = () => {
 	});
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-2">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-1.5">
 			<div className="text-center text-slate-800">
-				<h1 className="text-2xl font-extrabold drop-shadow-sm">
+				<h1 className="text-xl font-extrabold drop-shadow-sm">
 					{config.categoryVotingTitle}
 				</h1>
-				<p className="mt-0.5 text-sm drop-shadow-sm">
+				<p className="text-xs drop-shadow-sm">
 					{config.categoryVotingDescription}
 				</p>
 			</div>
 
-			<div className="rounded-xl border border-white/30 bg-gradient-to-br from-white to-blue-50 p-2.5 text-center shadow-2xl backdrop-blur-sm">
-				<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
+			<div className="rounded-lg border border-white/30 bg-gradient-to-br from-white to-blue-50 p-1.5 text-center shadow-lg backdrop-blur-sm">
+				<div className="text-[10px] font-bold tracking-wide text-gray-700 uppercase">
 					{config.timeRemaining}
 				</div>
-				<div className="text-3xl font-extrabold text-blue-600">
+				<div className="text-2xl font-extrabold text-blue-600">
 					<KmTimeCountdown ms={timeRemaining} />
 				</div>
 			</div>
 
-			<div className="grid grid-cols-2 gap-2.5">
+			<div className="grid grid-cols-2 gap-1.5">
 				{categoryVoting.categories.map((category) => {
 					const votes = voteCounts[category.id] || 0;
 					const isMyVote = myVote === category.id;
@@ -63,7 +63,7 @@ export const CategoryVotingView: React.FC = () => {
 							onClick={() => handleVote(category.id)}
 							disabled={hasVoted}
 							className={cn(
-								'relative rounded-2xl border-2 p-4 text-left transition-all duration-300',
+								'relative rounded-xl border-2 p-2.5 text-left transition-all duration-300',
 								'touch-manipulation shadow-lg hover:shadow-2xl active:scale-95',
 								isMyVote
 									? 'animate-pulse-glow border-green-400 bg-gradient-to-br from-green-50 to-emerald-100'
@@ -72,18 +72,18 @@ export const CategoryVotingView: React.FC = () => {
 							)}
 						>
 							{isMyVote && (
-								<div className="absolute top-4 right-4 rounded-full bg-green-500 p-1">
-									<Check className="h-5 w-5 text-white" />
+								<div className="absolute top-2 right-2 rounded-full bg-green-500 p-0.5">
+									<Check className="h-4 w-4 text-white" />
 								</div>
 							)}
-							<h3 className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-2xl font-bold text-transparent">
+							<h3 className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-base font-bold text-transparent">
 								{category.name}
 							</h3>
-							<p className="mt-2 font-medium text-gray-700">
+							<p className="mt-1 text-sm font-medium text-gray-700">
 								{category.description}
 							</p>
 							{votes > 0 && (
-								<div className="mt-4 inline-block rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-3 py-1 text-sm font-bold text-white shadow-md">
+								<div className="mt-2 inline-block rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-2 py-0.5 text-xs font-bold text-white shadow-md">
 									{votes} {votes === 1 ? 'vote' : 'votes'}
 								</div>
 							)}
@@ -93,8 +93,8 @@ export const CategoryVotingView: React.FC = () => {
 			</div>
 
 			{hasVoted && (
-				<div className="animate-slide-up rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 p-4 text-center shadow-xl">
-					<p className="text-base font-bold text-white drop-shadow-md">
+				<div className="animate-slide-up rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 p-2.5 text-center shadow-lg">
+					<p className="text-sm font-bold text-white drop-shadow-md">
 						{config.waitingForOtherPlayers}
 					</p>
 				</div>

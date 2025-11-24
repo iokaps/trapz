@@ -37,58 +37,58 @@ export const FinalScoresView: React.FC = () => {
 	};
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-3">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-1.5">
 			<div className="text-center text-slate-800">
-				<div className="inline-block rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 p-4 shadow-2xl">
-					<Trophy className="h-20 w-20 text-yellow-900 drop-shadow-lg" />
+				<div className="inline-block rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 p-3 shadow-lg">
+					<Trophy className="h-16 w-16 text-yellow-900 drop-shadow-lg" />
 				</div>
-				<h1 className="mt-6 text-5xl font-extrabold drop-shadow-sm">
+				<h1 className="mt-4 text-3xl font-extrabold drop-shadow-sm">
 					{config.finalScoresTitle}
 				</h1>
 			</div>
 
-			<div className="rounded-3xl border-2 border-white/30 bg-gradient-to-br from-white to-purple-50 p-10 shadow-2xl backdrop-blur-sm">
+			<div className="rounded-xl border-2 border-white/30 bg-gradient-to-br from-white to-purple-50 p-6 shadow-lg backdrop-blur-sm">
 				<div className="text-center">
-					<div className="text-sm font-bold tracking-wide text-gray-700 uppercase">
+					<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
 						{config.yourFinalScore}
 					</div>
-					<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-7xl font-extrabold text-transparent">
+					<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-5xl font-extrabold text-transparent">
 						{myScore}
 					</div>
-					<div className="mt-4 inline-block rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-2 text-lg font-bold text-white shadow-lg">
+					<div className="mt-2 inline-block rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-1 text-base font-bold text-white shadow-lg">
 						{config.rank}: #{myRank}
 					</div>
 				</div>
 			</div>
 
 			{podiumData.length > 0 && (
-				<div className="rounded-2xl border border-white/30 bg-white/90 p-8 shadow-2xl backdrop-blur-sm">
-					<h2 className="mb-6 bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-center text-2xl font-extrabold text-transparent">
+				<div className="rounded-xl border border-white/30 bg-white/90 p-4 shadow-lg backdrop-blur-sm">
+					<h2 className="mb-3 bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-center text-xl font-extrabold text-transparent">
 						{config.topPlayers}
 					</h2>
 					<KmPodiumTable entries={podiumData} />
 				</div>
 			)}
 
-			<div className="rounded-2xl border border-white/30 bg-white/90 p-6 shadow-2xl backdrop-blur-sm">
-				<h2 className="mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-extrabold text-transparent">
+			<div className="rounded-xl border border-white/30 bg-white/90 p-4 shadow-lg backdrop-blur-sm">
+				<h2 className="mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-base font-extrabold text-transparent">
 					{config.fullLeaderboard}
 				</h2>
-				<div className="space-y-3">
+				<div className="space-y-1.5">
 					{leaderboard.map((entry, index) => (
 						<div
 							key={entry.clientId}
 							className={cn(
-								'flex items-center justify-between rounded-xl p-4 shadow-md transition-all duration-300',
+								'flex items-center justify-between rounded-lg p-2.5 shadow-md transition-all duration-300',
 								entry.clientId === kmClient.id
 									? 'scale-105 border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50'
 									: 'bg-gradient-to-r from-gray-50 to-gray-100 hover:shadow-lg'
 							)}
 						>
-							<div className="flex items-center gap-4">
+							<div className="flex items-center gap-2">
 								<div
 									className={cn(
-										'flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold shadow-md',
+										'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold shadow-md',
 										index === 0
 											? 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900'
 											: index === 1
@@ -100,9 +100,11 @@ export const FinalScoresView: React.FC = () => {
 								>
 									{index + 1}
 								</div>
-								<div className="font-bold text-gray-800">{entry.name}</div>
+								<div className="text-sm font-bold text-gray-800">
+									{entry.name}
+								</div>
 							</div>
-							<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-extrabold text-transparent">
+							<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-extrabold text-transparent">
 								{entry.score}
 							</div>
 						</div>
@@ -114,8 +116,8 @@ export const FinalScoresView: React.FC = () => {
 				<button
 					onClick={handlePlayAgain}
 					className={cn(
-						'rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-5 text-xl font-bold text-white shadow-2xl',
-						'hover:shadow-3xl touch-manipulation transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-indigo-700 active:scale-95'
+						'rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-3 text-base font-bold text-white shadow-lg',
+						'touch-manipulation transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-indigo-700 active:scale-95'
 					)}
 				>
 					{config.playAgainButton}

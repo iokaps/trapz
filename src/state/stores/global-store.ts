@@ -23,6 +23,8 @@ export interface GlobalState {
 	lastQuestionResult: QuestionResult | null;
 	askedQuestions: string[]; // Array of question texts to prevent duplicates
 	pregeneratedQuestion: Question | null; // Pre-generated question during timer phases
+	totalQuestionsAsked: number; // Counter for all questions across all rounds
+	activeDoublePoints: Record<string, boolean>; // clientId -> has active double points
 }
 
 const initialState: GlobalState = {
@@ -39,7 +41,9 @@ const initialState: GlobalState = {
 	totalRounds: 5,
 	lastQuestionResult: null,
 	askedQuestions: [],
-	pregeneratedQuestion: null
+	pregeneratedQuestion: null,
+	totalQuestionsAsked: 0,
+	activeDoublePoints: {}
 };
 
 export const globalStore = kmClient.store<GlobalState>('global', initialState);

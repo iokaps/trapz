@@ -1,5 +1,5 @@
 import { kmClient } from '@/services/km-client';
-import type { TrapType } from '@/types/game';
+import type { SelectionType } from '@/types/game';
 
 export interface PlayerState {
 	name: string;
@@ -12,8 +12,9 @@ export interface PlayerState {
 		| 'question'
 		| 'question-result'
 		| 'final-scores';
-	selectedTrap: { type: TrapType; targetClientId: string } | null;
+	selectedTrap: { type: SelectionType; targetClientId: string } | null;
 	hasAnswered: boolean;
+	hasDoublePoints: boolean;
 	iceTapProgress: Record<string, number>; // answerId -> tap count
 	mudSwipeProgress: Record<string, number>; // answerId -> swipe count
 }
@@ -23,6 +24,7 @@ const initialState: PlayerState = {
 	currentView: 'lobby',
 	selectedTrap: null,
 	hasAnswered: false,
+	hasDoublePoints: false,
 	iceTapProgress: {},
 	mudSwipeProgress: {}
 };

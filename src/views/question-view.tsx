@@ -10,14 +10,14 @@ import { globalStore } from '@/state/stores/global-store';
 import { playerStore } from '@/state/stores/player-store';
 import { cn } from '@/utils/cn';
 import { KmTimeCountdown } from '@kokimoki/shared';
+import { motion } from 'motion/react';
 import * as React from 'react';
 import { useSnapshot } from 'valtio';
 
 export const QuestionView: React.FC = () => {
 	const { currentQuestion } = useSnapshot(globalStore.proxy);
-	const { hasAnswered, iceTapProgress, mudSwipeProgress } = useSnapshot(
-		playerStore.proxy
-	);
+	const { hasAnswered, hasDoublePoints, iceTapProgress, mudSwipeProgress } =
+		useSnapshot(playerStore.proxy);
 	const serverTime = useServerTimer();
 
 	if (!currentQuestion) {
@@ -54,34 +54,49 @@ export const QuestionView: React.FC = () => {
 	};
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-2">
-			<div className="rounded-xl border border-white/30 bg-gradient-to-br from-white to-purple-50 p-3 shadow-2xl backdrop-blur-sm">
-				<div className="mb-2 inline-block rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white uppercase shadow-md">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-1.5">
+			<div className="rounded-lg border border-white/30 bg-gradient-to-br from-white to-purple-50 p-2.5 shadow-lg backdrop-blur-sm">
+				<div className="mb-1 inline-block rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase shadow-md">
 					{currentQuestion.categoryName}
 				</div>
-				<h2 className="bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-xl leading-tight font-extrabold text-transparent">
+				<h2 className="bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-base leading-tight font-extrabold text-transparent">
 					{currentQuestion.text}
 				</h2>
 			</div>
 
-			<div className="rounded-xl border border-white/30 bg-gradient-to-br from-white to-pink-50 p-2 text-center shadow-2xl backdrop-blur-sm">
-				<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
+			<div className="rounded-lg border border-white/30 bg-gradient-to-br from-white to-pink-50 p-1.5 text-center shadow-lg backdrop-blur-sm">
+				<div className="text-[10px] font-bold tracking-wide text-gray-700 uppercase">
 					{config.timeRemaining}
 				</div>
-				<div className="text-2xl font-extrabold text-pink-600">
+				<div className="text-xl font-extrabold text-pink-600">
 					<KmTimeCountdown ms={timeRemaining} />
 				</div>
 			</div>
 
+			{hasDoublePoints && (
+				<motion.div
+					initial={{ scale: 0.8, opacity: 0 }}
+					animate={{ scale: 1, opacity: 1 }}
+					className="animate-pulse-glow rounded-lg bg-gradient-to-r from-yellow-400 to-amber-500 p-2 text-center shadow-lg"
+				>
+					<p className="text-sm font-extrabold text-white drop-shadow-lg">
+						⭐ 2X POINTS ACTIVE ⭐
+					</p>
+					<p className="text-[10px] text-white/90 drop-shadow-sm">
+						Answer correctly for double points!
+					</p>
+				</motion.div>
+			)}
+
 			{myTraps.length > 0 && (
-				<div className="animate-pulse-glow rounded-lg bg-gradient-to-r from-orange-400 to-red-500 p-2.5 text-center shadow-lg">
-					<p className="text-xs font-bold text-white drop-shadow-md">
+				<div className="animate-pulse-glow rounded-lg bg-gradient-to-r from-orange-400 to-red-500 p-1.5 text-center shadow-lg">
+					<p className="text-[10px] font-bold text-white drop-shadow-md">
 						{config.trapsActive}: {myTraps.length}
 					</p>
 				</div>
 			)}
 
-			<div className="grid grid-cols-2 gap-2.5">
+			<div className="grid grid-cols-2 gap-1.5">
 				{currentQuestion.answers.map((answer) => {
 					const iceTaps = iceTapProgress[answer.id] || 0;
 					const mudSwipes = mudSwipeProgress[answer.id] || 0;
@@ -95,16 +110,22 @@ export const QuestionView: React.FC = () => {
 					}
 
 					return (
-						<button
+						<motion.button
 							key={answer.id}
 							onClick={() => handleAnswerClick(answer.id)}
 							disabled={hasAnswered}
+							whileHover={
+								!hasAnswered && iceCleared && mudCleared ? { scale: 1.05 } : {}
+							}
+							whileTap={
+								!hasAnswered && iceCleared && mudCleared ? { scale: 0.95 } : {}
+							}
 							className={cn(
-								'relative flex aspect-square min-h-[100px] items-center justify-center overflow-hidden rounded-xl border-2 p-3 text-center text-base font-bold shadow-lg transition-all duration-300',
+								'relative flex aspect-square min-h-[80px] items-center justify-center overflow-hidden rounded-lg border-2 p-2 text-center text-sm font-bold shadow-lg transition-all duration-300',
 								hasAnswered
 									? 'border-gray-400 bg-gray-200 opacity-60'
 									: iceCleared && mudCleared
-										? 'touch-manipulation border-white/50 bg-gradient-to-br from-white to-blue-50 backdrop-blur-sm hover:scale-105 hover:border-blue-400 hover:shadow-2xl active:scale-95'
+										? 'touch-manipulation border-white/50 bg-gradient-to-br from-white to-blue-50 backdrop-blur-sm hover:border-blue-400 hover:shadow-2xl'
 										: 'border-white/50 bg-white/70 backdrop-blur-sm'
 							)}
 						>
@@ -133,17 +154,17 @@ export const QuestionView: React.FC = () => {
 									onSwipe={handleMudSwipe}
 								/>
 							)}
-						</button>
+						</motion.button>
 					);
 				})}
 			</div>
 
 			{hasAnswered && (
-				<div className="animate-slide-up rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-center shadow-xl">
-					<p className="text-base font-bold text-white drop-shadow-sm">
+				<div className="animate-slide-up rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 p-2.5 text-center shadow-lg">
+					<p className="text-sm font-bold text-white drop-shadow-sm">
 						{config.answerSubmitted}
 					</p>
-					<p className="mt-1 text-sm text-white/90 drop-shadow-sm">
+					<p className="text-xs text-white/90 drop-shadow-sm">
 						{config.waitingForOtherPlayers}
 					</p>
 				</div>
