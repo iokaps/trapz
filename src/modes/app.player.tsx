@@ -67,8 +67,13 @@ const App: React.FC = () => {
 	}, [started]);
 
 	// Reset hasAnswered when entering trap-selection phase (new round)
+	// Only reset trap progress when NOT in question or result phase
 	React.useEffect(() => {
-		if (started && gamePhase === 'trap-selection') {
+		if (
+			started &&
+			gamePhase === 'trap-selection' &&
+			currentView === 'trap-selection'
+		) {
 			kmClient
 				.transact([playerStore], ([playerState]) => {
 					playerState.hasAnswered = false;
@@ -77,7 +82,7 @@ const App: React.FC = () => {
 				})
 				.catch(() => {});
 		}
-	}, [started, gamePhase]);
+	}, [started, gamePhase, currentView]);
 
 	if (!name) {
 		return (
