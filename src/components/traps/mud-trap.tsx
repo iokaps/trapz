@@ -43,13 +43,24 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 		}
 	};
 
-	const handleTouchEnd = () => {
+	const handleTouchEnd = (e: React.TouchEvent) => {
+		e.stopPropagation();
 		setTouchStart(null);
 		setLastSwipeY(null);
 		setIsSwiping(false);
 	};
 
-	if (isCleared) {
+	// Add a small delay before removing the overlay to prevent accidental clicks
+	const [shouldRemove, setShouldRemove] = React.useState(false);
+
+	React.useEffect(() => {
+		if (isCleared) {
+			const timeout = setTimeout(() => setShouldRemove(true), 100);
+			return () => clearTimeout(timeout);
+		}
+	}, [isCleared]);
+
+	if (shouldRemove) {
 		return null;
 	}
 

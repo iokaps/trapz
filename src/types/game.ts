@@ -32,6 +32,7 @@ export interface CategoryVoting {
 	categories: Category[];
 	votes: Record<string, string>; // clientId -> categoryId
 	endTimestamp: number;
+	selectedCategory?: string; // Winning category ID after voting
 }
 
 export interface TrapSelection {

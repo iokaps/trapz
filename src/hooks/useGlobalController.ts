@@ -1,11 +1,12 @@
 import { kmClient } from '@/services/km-client';
 import { gameActions } from '@/state/actions/game-actions';
 import { globalStore } from '@/state/stores/global-store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSnapshot } from 'valtio';
 import { useServerTimer } from './useServerTime';
 
 export function useGlobalController() {
+	const transitioningRef = useRef(false);
 	const {
 		controllerConnectionId,
 		gamePhase,
@@ -17,7 +18,7 @@ export function useGlobalController() {
 	const connectionIds = connections.connectionIds;
 	const clientIds = connections.clientIds; // Online client IDs
 	const isGlobalController = controllerConnectionId === kmClient.connectionId;
-	const serverTime = useServerTimer(1000); // tick every second
+	const serverTime = useServerTimer(100); // Fast polling for responsive transitions
 
 	// Maintain connection that is assigned to be the global controller
 	useEffect(() => {
@@ -45,6 +46,13 @@ export function useGlobalController() {
 
 		// Category voting phase
 		if (gamePhase === 'category-voting' && categoryVoting) {
+			// Start pre-generating question early - as soon as category voting starts
+			if (!globalStore.proxy.pregeneratedQuestion) {
+				gameActions.pregenerateQuestion().catch(() => {
+					// Silently fail, will generate on-demand if needed
+				});
+			}
+
 			// Count only online players
 			const onlinePlayerCount = clientIds.size;
 			// Count votes from online players only
@@ -53,9 +61,9 @@ export function useGlobalController() {
 			).length;
 			const allVoted =
 				onlineVoteCount >= onlinePlayerCount && onlinePlayerCount > 0;
-			const timeExpired = serverTime >= categoryVoting.endTimestamp;
+			const remainingTime = categoryVoting.endTimestamp - serverTime;
 
-			if (allVoted && categoryVoting.endTimestamp - serverTime > 3000) {
+			if (allVoted && remainingTime > 3000) {
 				// All online players voted - start 3 second countdown
 				kmClient
 					.transact([globalStore], ([globalState]) => {
@@ -71,18 +79,24 @@ export function useGlobalController() {
 					})
 					.catch(() => {});
 			}
-			if (timeExpired) {
-				gameActions.startTrapSelection();
+			// Transition 500ms before timer to hide any delays
+			if (remainingTime <= 500 && !transitioningRef.current) {
+				transitioningRef.current = true;
+				gameActions.startTrapSelection().catch((error) => {
+					console.error('Failed to start trap selection:', error);
+					transitioningRef.current = false;
+				});
 			}
+		} else if (gamePhase !== 'category-voting') {
+			// Reset transition flag when leaving category voting phase
+			transitioningRef.current = false;
 		}
 
 		// Trap selection phase
 		if (gamePhase === 'trap-selection' && trapSelection) {
-			// Pre-generate question in the background if not already generated
+			// Ensure question is being pre-generated
 			if (!globalStore.proxy.pregeneratedQuestion) {
-				gameActions.pregenerateQuestion().catch(() => {
-					// Silently fail, will generate on-demand if needed
-				});
+				gameActions.pregenerateQuestion().catch(() => {});
 			}
 
 			// Count only online players
@@ -94,9 +108,9 @@ export function useGlobalController() {
 			).length;
 			const allSelected =
 				onlineSelectionCount >= onlinePlayerCount && onlinePlayerCount > 0;
-			const timeExpired = serverTime >= trapSelection.endTimestamp;
+			const remainingTime = trapSelection.endTimestamp - serverTime;
 
-			if (allSelected && trapSelection.endTimestamp - serverTime > 3000) {
+			if (allSelected && remainingTime > 3000) {
 				// All online players selected - start 3 second countdown
 				kmClient
 					.transact([globalStore], ([globalState]) => {
@@ -112,7 +126,8 @@ export function useGlobalController() {
 					})
 					.catch(() => {});
 			}
-			if (timeExpired) {
+			// Transition 500ms before timer to hide any delays
+			if (remainingTime <= 500) {
 				gameActions.startQuestion().catch((error) => {
 					console.error('Failed to start question:', error);
 				});
@@ -121,16 +136,14 @@ export function useGlobalController() {
 
 		// Question phase
 		if (gamePhase === 'question' && currentQuestion) {
-			// Pre-generate next question in the background if not already generated and not last round
+			// Pre-generate next question if not last round
 			const currentRound = globalStore.proxy.currentRound;
 			const totalRounds = globalStore.proxy.totalRounds;
 			if (
 				!globalStore.proxy.pregeneratedQuestion &&
 				currentRound < totalRounds
 			) {
-				gameActions.pregenerateQuestion().catch(() => {
-					// Silently fail, will generate on-demand if needed
-				});
+				gameActions.pregenerateQuestion().catch(() => {});
 			}
 
 			// Count only online players
@@ -141,9 +154,9 @@ export function useGlobalController() {
 			).filter((clientId) => clientIds.has(clientId)).length;
 			const allAnswered =
 				onlineAnswerCount >= onlinePlayerCount && onlinePlayerCount > 0;
-			const timeExpired = serverTime >= currentQuestion.endTimestamp;
+			const remainingTime = currentQuestion.endTimestamp - serverTime;
 
-			if (allAnswered && currentQuestion.endTimestamp - serverTime > 3000) {
+			if (allAnswered && remainingTime > 3000) {
 				// All online players answered - start 3 second countdown
 				kmClient
 					.transact([globalStore], ([globalState]) => {
@@ -159,29 +172,29 @@ export function useGlobalController() {
 					})
 					.catch(() => {});
 			}
-			if (timeExpired) {
+			// Transition 500ms before timer to hide any delays
+			if (remainingTime <= 500) {
 				gameActions.calculateAndShowResults();
 			}
 		}
 
-		// Question result phase - auto-advance after 5 seconds
+		// Question result phase
 		if (gamePhase === 'question-result') {
-			// Pre-generate next question in the background if not already generated and not last round
+			// Pre-generate next question if not last round
 			const currentRound = globalStore.proxy.currentRound;
 			const totalRounds = globalStore.proxy.totalRounds;
 			if (
 				!globalStore.proxy.pregeneratedQuestion &&
 				currentRound < totalRounds
 			) {
-				gameActions.pregenerateQuestion().catch(() => {
-					// Silently fail, will generate on-demand if needed
-				});
+				gameActions.pregenerateQuestion().catch(() => {});
 			}
 
 			const lastResult = globalStore.proxy.lastQuestionResult;
 			if (lastResult && lastResult.shownTimestamp) {
-				const timeExpired = serverTime >= lastResult.shownTimestamp + 5000;
-				if (timeExpired) {
+				const remainingTime = lastResult.shownTimestamp + 5000 - serverTime;
+				// Transition 500ms before timer to hide any delays
+				if (remainingTime <= 500) {
 					gameActions.nextRoundOrEnd();
 				}
 			}

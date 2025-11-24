@@ -175,7 +175,46 @@ export const gameActions = {
 	 * Called by global controller
 	 */
 	async startTrapSelection() {
+		// Calculate winning category
+		const votes = globalStore.proxy.categoryVoting?.votes || {};
+		const voteCounts: Record<string, number> = {};
+
+		Object.values(votes).forEach((categoryId) => {
+			voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
+		});
+
+		let winningCategoryId = '';
+		let maxVotes = 0;
+		Object.entries(voteCounts).forEach(([categoryId, count]) => {
+			if (count > maxVotes) {
+				maxVotes = count;
+				winningCategoryId = categoryId;
+			}
+		});
+
+		// If no votes, pick first category
+		if (
+			!winningCategoryId &&
+			globalStore.proxy.categoryVoting?.categories.length
+		) {
+			winningCategoryId = globalStore.proxy.categoryVoting.categories[0].id;
+		}
+
+		// If still no category (edge case), randomly pick from all categories
+		if (!winningCategoryId && globalStore.proxy.categoryVoting?.categories) {
+			const categories = globalStore.proxy.categoryVoting.categories;
+			if (categories.length > 0) {
+				winningCategoryId =
+					categories[Math.floor(Math.random() * categories.length)].id;
+			}
+		}
+
 		await kmClient.transact([globalStore], ([globalState]) => {
+			// Store selected category in categoryVoting
+			if (globalState.categoryVoting && winningCategoryId) {
+				globalState.categoryVoting.selectedCategory = winningCategoryId;
+			}
+
 			globalState.gamePhase = 'trap-selection';
 			globalState.trapSelection = {
 				endTimestamp: kmClient.serverTimestamp() + 30000, // 30 seconds
@@ -183,6 +222,8 @@ export const gameActions = {
 				traps: {}
 			};
 		});
+
+		soundEffects.play('phase-transition');
 	},
 
 	/**
@@ -256,22 +297,27 @@ export const gameActions = {
 		try {
 			console.log('[pregenerateQuestion] Starting background generation...');
 
-			// Get category info
-			const votes = globalStore.proxy.categoryVoting?.votes || {};
-			const voteCounts: Record<string, number> = {};
+			// Get category info - prefer selectedCategory if available
+			let winningCategoryId =
+				globalStore.proxy.categoryVoting?.selectedCategory || '';
 
-			Object.values(votes).forEach((categoryId) => {
-				voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
-			});
+			// If no selectedCategory yet (early pre-generation), calculate from votes
+			if (!winningCategoryId) {
+				const votes = globalStore.proxy.categoryVoting?.votes || {};
+				const voteCounts: Record<string, number> = {};
 
-			let winningCategoryId = '';
-			let maxVotes = 0;
-			Object.entries(voteCounts).forEach(([categoryId, count]) => {
-				if (count > maxVotes) {
-					maxVotes = count;
-					winningCategoryId = categoryId;
-				}
-			});
+				Object.values(votes).forEach((categoryId) => {
+					voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
+				});
+
+				let maxVotes = 0;
+				Object.entries(voteCounts).forEach(([categoryId, count]) => {
+					if (count > maxVotes) {
+						maxVotes = count;
+						winningCategoryId = categoryId;
+					}
+				});
+			}
 
 			const category = globalStore.proxy.categoryVoting?.categories.find(
 				(c) => c.id === winningCategoryId
@@ -283,9 +329,18 @@ export const gameActions = {
 				categoryName
 			);
 
-			// Generate question
+			// Generate question with timeout
 			const askedQuestions = globalStore.proxy.askedQuestions || [];
-			const question = await generateQuestion(categoryName, askedQuestions);
+
+			// Set a 10 second timeout for AI generation
+			const timeoutPromise = new Promise<never>((_, reject) => {
+				setTimeout(() => reject(new Error('AI timeout')), 10000);
+			});
+
+			const generationPromise = generateQuestion(categoryName, askedQuestions);
+
+			// Race between generation and timeout
+			const question = await Promise.race([generationPromise, timeoutPromise]);
 
 			console.log('[pregenerateQuestion] Question generated successfully');
 
@@ -294,8 +349,32 @@ export const gameActions = {
 				globalState.pregeneratedQuestion = question;
 			});
 		} catch (error) {
-			console.error('[pregenerateQuestion] Failed:', error);
-			throw error;
+			console.warn('[pregenerateQuestion] Failed, creating fallback:', error);
+
+			// Create a simple fallback question if AI fails or times out
+			const category = globalStore.proxy.categoryVoting?.categories.find((c) =>
+				Object.values(globalStore.proxy.categoryVoting?.votes || {}).includes(
+					c.id
+				)
+			);
+			const categoryName = category?.name || 'General Knowledge';
+
+			const fallbackQuestion: Question = {
+				id: `q-${Date.now()}-fallback`,
+				text: `What is a fact about ${categoryName}?`,
+				answers: [
+					{ id: 'a', text: 'Option A' },
+					{ id: 'b', text: 'Option B' },
+					{ id: 'c', text: 'Option C' },
+					{ id: 'd', text: 'Option D' }
+				],
+				correctAnswerId: 'a',
+				categoryId: categoryName.toLowerCase().replace(/\s+/g, '-')
+			};
+
+			await kmClient.transact([globalStore], ([globalState]) => {
+				globalState.pregeneratedQuestion = fallbackQuestion;
+			});
 		}
 	},
 

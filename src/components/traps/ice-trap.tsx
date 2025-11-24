@@ -30,7 +30,17 @@ export const IceTrap: React.FC<IceTrapProps> = ({
 		}
 	};
 
-	if (isBroken) {
+	// Add a small delay before removing the overlay to prevent accidental clicks
+	const [shouldRemove, setShouldRemove] = React.useState(false);
+
+	React.useEffect(() => {
+		if (isBroken) {
+			const timeout = setTimeout(() => setShouldRemove(true), 100);
+			return () => clearTimeout(timeout);
+		}
+	}, [isBroken]);
+
+	if (shouldRemove) {
 		return null;
 	}
 
