@@ -66,14 +66,15 @@ const App: React.FC = () => {
 		}
 	}, [started]);
 
-	// Reset hasAnswered when entering trap-selection phase (new round)
-	// Only reset trap progress when NOT in question or result phase
+	// Reset hasAnswered and trap progress only when entering trap-selection from another phase
+	const previousPhaseRef = React.useRef(gamePhase);
 	React.useEffect(() => {
 		if (
 			started &&
 			gamePhase === 'trap-selection' &&
-			currentView === 'trap-selection'
+			previousPhaseRef.current !== 'trap-selection'
 		) {
+			previousPhaseRef.current = gamePhase;
 			kmClient
 				.transact([playerStore], ([playerState]) => {
 					playerState.hasAnswered = false;
@@ -81,8 +82,10 @@ const App: React.FC = () => {
 					playerState.mudSwipeProgress = {};
 				})
 				.catch(() => {});
+		} else {
+			previousPhaseRef.current = gamePhase;
 		}
-	}, [started, gamePhase, currentView]);
+	}, [started, gamePhase]);
 
 	if (!name) {
 		return (
