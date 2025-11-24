@@ -54,34 +54,34 @@ export const QuestionView: React.FC = () => {
 	};
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-3">
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-purple-50 p-4 shadow-2xl backdrop-blur-sm">
-				<div className="mb-3 inline-block rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase shadow-md">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-2">
+			<div className="rounded-xl border border-white/30 bg-gradient-to-br from-white to-purple-50 p-3 shadow-2xl backdrop-blur-sm">
+				<div className="mb-2 inline-block rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white uppercase shadow-md">
 					{currentQuestion.categoryName}
 				</div>
-				<h2 className="bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-3xl leading-tight font-extrabold text-transparent">
+				<h2 className="bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-xl leading-tight font-extrabold text-transparent">
 					{currentQuestion.text}
 				</h2>
 			</div>
 
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-pink-50 p-3 text-center shadow-2xl backdrop-blur-sm">
+			<div className="rounded-xl border border-white/30 bg-gradient-to-br from-white to-pink-50 p-2 text-center shadow-2xl backdrop-blur-sm">
 				<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
 					{config.timeRemaining}
 				</div>
-				<div className="text-3xl font-extrabold text-pink-600">
+				<div className="text-2xl font-extrabold text-pink-600">
 					<KmTimeCountdown ms={timeRemaining} />
 				</div>
 			</div>
 
 			{myTraps.length > 0 && (
-				<div className="animate-pulse-glow rounded-xl bg-gradient-to-r from-orange-400 to-red-500 p-4 text-center shadow-lg">
-					<p className="text-sm font-bold text-white drop-shadow-md">
+				<div className="animate-pulse-glow rounded-lg bg-gradient-to-r from-orange-400 to-red-500 p-2.5 text-center shadow-lg">
+					<p className="text-xs font-bold text-white drop-shadow-md">
 						{config.trapsActive}: {myTraps.length}
 					</p>
 				</div>
 			)}
 
-			<div className="grid grid-cols-2 gap-4">
+			<div className="grid grid-cols-2 gap-2.5">
 				{currentQuestion.answers.map((answer) => {
 					const iceTaps = iceTapProgress[answer.id] || 0;
 					const mudSwipes = mudSwipeProgress[answer.id] || 0;
@@ -100,7 +100,7 @@ export const QuestionView: React.FC = () => {
 							onClick={() => handleAnswerClick(answer.id)}
 							disabled={hasAnswered}
 							className={cn(
-								'relative flex aspect-square min-h-[120px] items-center justify-center overflow-hidden rounded-2xl border-2 p-4 text-center text-lg font-bold shadow-lg transition-all duration-300',
+								'relative flex aspect-square min-h-[100px] items-center justify-center overflow-hidden rounded-xl border-2 p-3 text-center text-base font-bold shadow-lg transition-all duration-300',
 								hasAnswered
 									? 'border-gray-400 bg-gray-200 opacity-60'
 									: iceCleared && mudCleared
@@ -139,11 +139,11 @@ export const QuestionView: React.FC = () => {
 			</div>
 
 			{hasAnswered && (
-				<div className="animate-slide-up rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center shadow-xl">
-					<p className="text-xl font-bold text-white drop-shadow-sm">
+				<div className="animate-slide-up rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-center shadow-xl">
+					<p className="text-base font-bold text-white drop-shadow-sm">
 						{config.answerSubmitted}
 					</p>
-					<p className="mt-2 text-white/90 drop-shadow-sm">
+					<p className="mt-1 text-sm text-white/90 drop-shadow-sm">
 						{config.waitingForOtherPlayers}
 					</p>
 				</div>

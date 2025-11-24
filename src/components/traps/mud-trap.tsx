@@ -17,7 +17,7 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 }) => {
 	const [touchStart, setTouchStart] = React.useState<number | null>(null);
 	const [lastSwipeY, setLastSwipeY] = React.useState<number | null>(null);
-	const isCleared = swipeCount >= 3;
+	const isCleared = swipeCount >= 8;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		e.stopPropagation();
@@ -32,8 +32,8 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 		const currentY = e.touches[0].clientY;
 		const distance = Math.abs(currentY - lastSwipeY);
 
-		// Require 50px swipe distance from last swipe position
-		if (distance > 50) {
+		// Require 80px swipe distance from last swipe position
+		if (distance > 80) {
 			onSwipe(answerId, swipeCount + 1);
 			// Update last swipe position to allow continuous swiping
 			setLastSwipeY(currentY);
@@ -49,8 +49,8 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 		return null;
 	}
 
-	// Calculate opacity based on swipe progress
-	const opacity = 0.95 - swipeCount * 0.25;
+	// Calculate opacity based on swipe progress (fade gradually over 8 swipes)
+	const opacity = 0.95 - swipeCount * 0.1;
 
 	return (
 		<div
@@ -72,7 +72,7 @@ export const MudTrap: React.FC<MudTrapProps> = ({
 					<Droplets className="h-20 w-20 text-amber-200 drop-shadow-xl" />
 				</div>
 				<div className="px-4 text-center text-2xl font-extrabold text-amber-100 drop-shadow-lg">
-					Swipe {3 - swipeCount} more {swipeCount === 2 ? 'time' : 'times'}!
+					Swipe {8 - swipeCount} more {swipeCount === 7 ? 'time' : 'times'}!
 				</div>
 			</div>
 		</div>

@@ -25,9 +25,9 @@ export const QuestionResultView: React.FC = () => {
 
 	if (!myResult) {
 		return (
-			<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-6">
-				<div className="rounded-2xl bg-white/90 p-10 text-center shadow-2xl backdrop-blur-sm">
-					<p className="text-xl font-bold text-gray-700">
+			<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-3">
+				<div className="rounded-xl bg-white/90 p-6 text-center shadow-2xl backdrop-blur-sm">
+					<p className="text-lg font-bold text-gray-700">
 						{config.didNotAnswer}
 					</p>
 				</div>
@@ -36,10 +36,10 @@ export const QuestionResultView: React.FC = () => {
 	}
 
 	return (
-		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-6">
+		<div className="animate-slide-up flex w-full max-w-2xl flex-col gap-3">
 			<div
 				className={cn(
-					'rounded-3xl p-10 text-center shadow-2xl',
+					'rounded-2xl p-6 text-center shadow-2xl',
 					myResult.isCorrect
 						? 'bg-gradient-to-br from-green-400 to-emerald-600'
 						: 'bg-gradient-to-br from-red-400 to-rose-600'
@@ -47,43 +47,43 @@ export const QuestionResultView: React.FC = () => {
 			>
 				<div className="flex justify-center">
 					{myResult.isCorrect ? (
-						<div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
-							<Check className="h-20 w-20 text-white drop-shadow-lg" />
+						<div className="rounded-full bg-white/20 p-3 backdrop-blur-sm">
+							<Check className="h-14 w-14 text-white drop-shadow-lg" />
 						</div>
 					) : (
-						<div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
-							<X className="h-20 w-20 text-white drop-shadow-lg" />
+						<div className="rounded-full bg-white/20 p-3 backdrop-blur-sm">
+							<X className="h-14 w-14 text-white drop-shadow-lg" />
 						</div>
 					)}
 				</div>
-				<h2 className="mt-4 text-3xl font-extrabold text-white drop-shadow-sm">
+				<h2 className="mt-3 text-2xl font-extrabold text-white drop-shadow-sm">
 					{myResult.isCorrect ? config.correct : config.incorrect}
 				</h2>
 			</div>
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-blue-50 p-4 shadow-2xl backdrop-blur-sm">
+			<div className="rounded-xl border border-white/30 bg-gradient-to-br from-white to-blue-50 p-3 shadow-2xl backdrop-blur-sm">
 				<div className="text-center">
 					<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
 						{config.pointsEarned}
 					</div>
-					<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-5xl font-extrabold text-transparent">
+					<div className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-extrabold text-transparent">
 						{myResult.pointsEarned}
 					</div>
 				</div>
 
-				<div className="mt-8 grid grid-cols-2 gap-6 border-t-2 border-gray-200 pt-6">
+				<div className="mt-4 grid grid-cols-2 gap-4 border-t-2 border-gray-200 pt-4">
 					<div className="text-center">
-						<div className="text-sm font-bold tracking-wide text-gray-600 uppercase">
+						<div className="text-xs font-bold tracking-wide text-gray-600 uppercase">
 							{config.yourTime}
 						</div>
-						<div className="text-2xl font-extrabold text-gray-800">
+						<div className="text-xl font-extrabold text-gray-800">
 							{(myResult.timeToAnswer / 1000).toFixed(1)}s
 						</div>
 					</div>
 					<div className="text-center">
-						<div className="text-sm font-bold tracking-wide text-gray-600 uppercase">
+						<div className="text-xs font-bold tracking-wide text-gray-600 uppercase">
 							{config.yourAnswer}
 						</div>
-						<div className="text-2xl font-extrabold break-words text-gray-800">
+						<div className="text-lg font-extrabold break-words text-gray-800">
 							{
 								currentQuestion.answers.find((a) => a.id === myResult.answerId)
 									?.text
@@ -93,22 +93,22 @@ export const QuestionResultView: React.FC = () => {
 				</div>
 			</div>
 			{!myResult.isCorrect && (
-				<div className="rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 p-8 shadow-xl">
+				<div className="rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 p-5 shadow-xl">
 					<div className="text-center">
-						<div className="text-sm font-bold tracking-wide text-white/90 uppercase">
+						<div className="text-xs font-bold tracking-wide text-white/90 uppercase">
 							{config.correctAnswerWas}
 						</div>
-						<div className="mt-3 text-2xl font-extrabold text-white drop-shadow-md">
+						<div className="mt-2 text-xl font-extrabold text-white drop-shadow-md">
 							{correctAnswer?.text}
 						</div>
 					</div>
 				</div>
 			)}
-			<div className="rounded-2xl border border-white/30 bg-gradient-to-br from-white to-green-50 p-6 text-center shadow-2xl backdrop-blur-sm">
-				<div className="text-sm font-bold tracking-wide text-gray-700 uppercase">
+			<div className="rounded-xl border border-white/30 bg-gradient-to-br from-white to-green-50 p-3 text-center shadow-2xl backdrop-blur-sm">
+				<div className="text-xs font-bold tracking-wide text-gray-700 uppercase">
 					{config.nextRoundStartingSoon}
 				</div>
-				<div className="text-4xl font-extrabold text-green-600">
+				<div className="text-3xl font-extrabold text-green-600">
 					<KmTimeCountdown
 						ms={Math.max(
 							0,

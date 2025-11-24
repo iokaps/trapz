@@ -6,6 +6,7 @@ import type {
 	QuestionResult,
 	TrapSelection
 } from '@/types/game';
+import type { Question } from '@/utils/generate-question';
 
 export interface GlobalState {
 	controllerConnectionId: string;
@@ -21,6 +22,7 @@ export interface GlobalState {
 	totalRounds: number;
 	lastQuestionResult: QuestionResult | null;
 	askedQuestions: string[]; // Array of question texts to prevent duplicates
+	pregeneratedQuestion: Question | null; // Pre-generated question during timer phases
 }
 
 const initialState: GlobalState = {
@@ -36,7 +38,8 @@ const initialState: GlobalState = {
 	currentRound: 0,
 	totalRounds: 5,
 	lastQuestionResult: null,
-	askedQuestions: []
+	askedQuestions: [],
+	pregeneratedQuestion: null
 };
 
 export const globalStore = kmClient.store<GlobalState>('global', initialState);

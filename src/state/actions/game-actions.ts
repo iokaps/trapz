@@ -219,72 +219,169 @@ export const gameActions = {
 	},
 
 	/**
+	 * Pre-generate question in background during timer phases
+	 * This eliminates loading delays between phases
+	 */
+	async pregenerateQuestion() {
+		// Don't regenerate if already exists
+		if (globalStore.proxy.pregeneratedQuestion) {
+			return;
+		}
+
+		try {
+			console.log('[pregenerateQuestion] Starting background generation...');
+
+			// Get category info
+			const votes = globalStore.proxy.categoryVoting?.votes || {};
+			const voteCounts: Record<string, number> = {};
+
+			Object.values(votes).forEach((categoryId) => {
+				voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
+			});
+
+			let winningCategoryId = '';
+			let maxVotes = 0;
+			Object.entries(voteCounts).forEach(([categoryId, count]) => {
+				if (count > maxVotes) {
+					maxVotes = count;
+					winningCategoryId = categoryId;
+				}
+			});
+
+			const category = globalStore.proxy.categoryVoting?.categories.find(
+				(c) => c.id === winningCategoryId
+			);
+			const categoryName = category?.name || 'General Knowledge';
+
+			console.log(
+				'[pregenerateQuestion] Generating for category:',
+				categoryName
+			);
+
+			// Generate question
+			const askedQuestions = globalStore.proxy.askedQuestions || [];
+			const question = await generateQuestion(categoryName, askedQuestions);
+
+			console.log('[pregenerateQuestion] Question generated successfully');
+
+			// Store in global state
+			await kmClient.transact([globalStore], ([globalState]) => {
+				globalState.pregeneratedQuestion = question;
+			});
+		} catch (error) {
+			console.error('[pregenerateQuestion] Failed:', error);
+			throw error;
+		}
+	},
+
+	/**
 	 * Start question phase with AI-generated question
 	 * Called by global controller after distributing traps
 	 */
 	async startQuestion() {
-		// Get category info BEFORE transaction
-		const votes = globalStore.proxy.categoryVoting?.votes || {};
-		const voteCounts: Record<string, number> = {};
+		try {
+			console.log('[startQuestion] Starting...');
 
-		Object.values(votes).forEach((categoryId) => {
-			voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
-		});
+			let question = globalStore.proxy.pregeneratedQuestion;
 
-		let winningCategoryId = '';
-		let maxVotes = 0;
-		Object.entries(voteCounts).forEach(([categoryId, count]) => {
-			if (count > maxVotes) {
-				maxVotes = count;
-				winningCategoryId = categoryId;
-			}
-		});
+			// If no pre-generated question, generate now (fallback)
+			if (!question) {
+				console.log(
+					'[startQuestion] No pre-generated question, generating now...'
+				);
 
-		// Get category name
-		const category = globalStore.proxy.categoryVoting?.categories.find(
-			(c) => c.id === winningCategoryId
-		);
-		const categoryName = category?.name || 'General Knowledge';
+				// Get category info
+				const votes = globalStore.proxy.categoryVoting?.votes || {};
+				const voteCounts: Record<string, number> = {};
 
-		// Generate question BEFORE transaction, avoiding previously asked questions
-		const askedQuestions = globalStore.proxy.askedQuestions || [];
-		const question = await generateQuestion(categoryName, askedQuestions);
-
-		// NOW do the transaction with the generated question
-		await kmClient.transact([globalStore], ([globalState]) => {
-			// Store this question to prevent duplicates
-			globalState.askedQuestions.push(question.text);
-
-			// Distribute traps to players
-			const trapsApplied: Record<string, TrapType[]> = {};
-			const trapSelections = globalState.trapSelection?.traps || {};
-
-			Object.values(trapSelections).forEach((traps) => {
-				traps.forEach((trap) => {
-					if (!trapsApplied[trap.targetClientId]) {
-						trapsApplied[trap.targetClientId] = [];
-					}
-					trapsApplied[trap.targetClientId].push(trap.type);
+				Object.values(votes).forEach((categoryId) => {
+					voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
 				});
+
+				let winningCategoryId = '';
+				let maxVotes = 0;
+				Object.entries(voteCounts).forEach(([categoryId, count]) => {
+					if (count > maxVotes) {
+						maxVotes = count;
+						winningCategoryId = categoryId;
+					}
+				});
+
+				const category = globalStore.proxy.categoryVoting?.categories.find(
+					(c) => c.id === winningCategoryId
+				);
+				const categoryName = category?.name || 'General Knowledge';
+
+				const askedQuestions = globalStore.proxy.askedQuestions || [];
+				question = await generateQuestion(categoryName, askedQuestions);
+			} else {
+				console.log('[startQuestion] Using pre-generated question');
+			}
+
+			// Get category name for display
+			const votes = globalStore.proxy.categoryVoting?.votes || {};
+			const voteCounts: Record<string, number> = {};
+			Object.values(votes).forEach((categoryId) => {
+				voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
+			});
+			let winningCategoryId = '';
+			let maxVotes = 0;
+			Object.entries(voteCounts).forEach(([categoryId, count]) => {
+				if (count > maxVotes) {
+					maxVotes = count;
+					winningCategoryId = categoryId;
+				}
+			});
+			const category = globalStore.proxy.categoryVoting?.categories.find(
+				(c) => c.id === winningCategoryId
+			);
+			const categoryName = category?.name || 'General Knowledge';
+
+			// NOW do the transaction with the generated question
+			await kmClient.transact([globalStore], ([globalState]) => {
+				// Store this question to prevent duplicates
+				globalState.askedQuestions.push(question.text);
+
+				// Distribute traps to players
+				const trapsApplied: Record<string, TrapType[]> = {};
+				const trapSelections = globalState.trapSelection?.traps || {};
+
+				Object.values(trapSelections).forEach((traps) => {
+					traps.forEach((trap) => {
+						if (!trapsApplied[trap.targetClientId]) {
+							trapsApplied[trap.targetClientId] = [];
+						}
+						trapsApplied[trap.targetClientId].push(trap.type);
+					});
+				});
+
+				globalState.gamePhase = 'question';
+				globalState.currentQuestion = {
+					id: question.id,
+					text: question.text,
+					answers: question.answers,
+					correctAnswerId: question.correctAnswerId,
+					categoryId: question.categoryId,
+					categoryName,
+					startTimestamp: kmClient.serverTimestamp(),
+					endTimestamp: kmClient.serverTimestamp() + 30000, // 30 seconds
+					playerAnswers: {},
+					trapsApplied
+				};
+
+				// Clear trap selection and pre-generated question
+				globalState.trapSelection = null;
+				globalState.pregeneratedQuestion = null;
 			});
 
-			globalState.gamePhase = 'question';
-			globalState.currentQuestion = {
-				id: question.id,
-				text: question.text,
-				answers: question.answers,
-				correctAnswerId: question.correctAnswerId,
-				categoryId: question.categoryId,
-				categoryName,
-				startTimestamp: kmClient.serverTimestamp(),
-				endTimestamp: kmClient.serverTimestamp() + 30000, // 30 seconds
-				playerAnswers: {},
-				trapsApplied
-			};
-
-			// Clear trap selection
-			globalState.trapSelection = null;
-		});
+			console.log('[startQuestion] Phase transition complete');
+		} catch (error) {
+			console.error(
+				'[startQuestion] Error during question generation or transition:',
+				error
+			);
+			throw error;
+		}
 	},
 
 	/**
@@ -415,6 +512,7 @@ export const gameActions = {
 			globalState.currentRound = 0;
 			globalState.lastQuestionResult = null;
 			globalState.askedQuestions = [];
+			globalState.pregeneratedQuestion = null;
 		});
 	},
 

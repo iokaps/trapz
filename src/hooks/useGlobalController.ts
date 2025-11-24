@@ -78,6 +78,13 @@ export function useGlobalController() {
 
 		// Trap selection phase
 		if (gamePhase === 'trap-selection' && trapSelection) {
+			// Pre-generate question in the background if not already generated
+			if (!globalStore.proxy.pregeneratedQuestion) {
+				gameActions.pregenerateQuestion().catch(() => {
+					// Silently fail, will generate on-demand if needed
+				});
+			}
+
 			// Count only online players
 			const onlinePlayerCount = clientIds.size;
 			// Count selections from online players only
@@ -106,11 +113,11 @@ export function useGlobalController() {
 					.catch(() => {});
 			}
 			if (timeExpired) {
-				gameActions.startQuestion();
+				gameActions.startQuestion().catch((error) => {
+					console.error('Failed to start question:', error);
+				});
 			}
-		}
-
-		// Question phase
+		} // Question phase
 		if (gamePhase === 'question' && currentQuestion) {
 			// Count only online players
 			const onlinePlayerCount = clientIds.size;
