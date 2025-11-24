@@ -19,9 +19,20 @@ export const IceTrap: React.FC<IceTrapProps> = ({
 	const isBroken = tapCount >= 3;
 	const [isShaking, setIsShaking] = React.useState(false);
 
+	const [hasTouched, setHasTouched] = React.useState(false);
+
 	const handleTap = (e: React.MouseEvent | React.TouchEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
+
+		// Prevent both touch and click from firing on the same interaction
+		if ('touches' in e) {
+			setHasTouched(true);
+		} else if (hasTouched) {
+			// Skip click event if touch already fired
+			setHasTouched(false);
+			return;
+		}
 
 		if (!isBroken) {
 			setIsShaking(true);

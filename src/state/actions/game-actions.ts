@@ -349,32 +349,35 @@ export const gameActions = {
 				globalState.pregeneratedQuestion = question;
 			});
 		} catch (error) {
-			console.warn('[pregenerateQuestion] Failed, creating fallback:', error);
+			console.warn(
+				'[pregenerateQuestion] AI failed, using fallback question:',
+				error
+			);
 
-			// Create a simple fallback question if AI fails or times out
+			// Use fallback question bank instead of generic placeholder
 			const category = globalStore.proxy.categoryVoting?.categories.find((c) =>
 				Object.values(globalStore.proxy.categoryVoting?.votes || {}).includes(
 					c.id
 				)
 			);
+			const categoryId = category?.id || 'general';
 			const categoryName = category?.name || 'General Knowledge';
+			const askedQuestions = globalStore.proxy.askedQuestions || [];
 
-			const fallbackQuestion: Question = {
-				id: `q-${Date.now()}-fallback`,
-				text: `What is a fact about ${categoryName}?`,
-				answers: [
-					{ id: 'a', text: 'Option A' },
-					{ id: 'b', text: 'Option B' },
-					{ id: 'c', text: 'Option C' },
-					{ id: 'd', text: 'Option D' }
-				],
-				correctAnswerId: 'a',
-				categoryId: categoryName.toLowerCase().replace(/\s+/g, '-')
-			};
+			const { getFallbackQuestion } = await import(
+				'@/utils/fallback-questions'
+			);
+			const fallbackQuestion = getFallbackQuestion(
+				categoryId,
+				categoryName,
+				askedQuestions
+			);
 
-			await kmClient.transact([globalStore], ([globalState]) => {
-				globalState.pregeneratedQuestion = fallbackQuestion;
-			});
+			if (fallbackQuestion) {
+				await kmClient.transact([globalStore], ([globalState]) => {
+					globalState.pregeneratedQuestion = fallbackQuestion;
+				});
+			}
 		}
 	},
 
@@ -388,36 +391,50 @@ export const gameActions = {
 
 			let question = globalStore.proxy.pregeneratedQuestion;
 
-			// If no pre-generated question, generate now (fallback)
+			// If no pre-generated question, instantly use fallback (zero delay!)
 			if (!question) {
 				console.log(
-					'[startQuestion] No pre-generated question, generating now...'
+					'[startQuestion] No pre-generated question, using instant fallback...'
 				);
 
 				// Get category info
-				const votes = globalStore.proxy.categoryVoting?.votes || {};
-				const voteCounts: Record<string, number> = {};
-
-				Object.values(votes).forEach((categoryId) => {
-					voteCounts[categoryId] = (voteCounts[categoryId] || 0) + 1;
-				});
-
-				let winningCategoryId = '';
-				let maxVotes = 0;
-				Object.entries(voteCounts).forEach(([categoryId, count]) => {
-					if (count > maxVotes) {
-						maxVotes = count;
-						winningCategoryId = categoryId;
-					}
-				});
-
+				const winningCategoryId =
+					globalStore.proxy.categoryVoting?.selectedCategory || '';
 				const category = globalStore.proxy.categoryVoting?.categories.find(
 					(c) => c.id === winningCategoryId
 				);
+				const categoryId = category?.id || 'general';
 				const categoryName = category?.name || 'General Knowledge';
-
 				const askedQuestions = globalStore.proxy.askedQuestions || [];
-				question = await generateQuestion(categoryName, askedQuestions);
+
+				// Get instant fallback question from question bank
+				const { getFallbackQuestion } = await import(
+					'@/utils/fallback-questions'
+				);
+				question = getFallbackQuestion(
+					categoryId,
+					categoryName,
+					askedQuestions
+				);
+
+				if (!question) {
+					// Last resort fallback if question bank fails
+					question = {
+						id: `q-${Date.now()}-emergency`,
+						text: 'What is your favorite thing?',
+						answers: [
+							{ id: 'a', text: 'Option A' },
+							{ id: 'b', text: 'Option B' },
+							{ id: 'c', text: 'Option C' },
+							{ id: 'd', text: 'Option D' }
+						],
+						correctAnswerId: 'a',
+						categoryId: 'general'
+					};
+				}
+
+				// Continue AI generation in background for next round
+				this.pregenerateQuestion().catch(() => {});
 			} else {
 				console.log('[startQuestion] Using pre-generated question');
 			}
